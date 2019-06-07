@@ -19,7 +19,7 @@ strST= (ST 0, ST 0)
 chgST EM True = CR
 chgST EM False = ZR
 chgST i _ = i
-addST (ST x) y = ST $ x+y
+addST (ST x) = ST $ x+1
 
 --summer
 sums (x:xs) = foldl (.+.) x xs
@@ -46,16 +46,17 @@ modify2Darray me i (x:xs) = x: modify2Darray me (i-1) xs
 
 
 changeBoard me i j =   \(b, (s1, s2)) ->  do let nb = modify2DarrayS me i j b;
-                                             (nb, (addST s1 1, whatsWrong2 nb . whatsWrong $ nb))
+                                             (nb, (addST s1, whatsWrong2 nb . whatsWrong1 $ nb))
 
-whatsWrong :: Brd->WINNER
-whatsWrong s  | l >=9 = FW
-              | otherwise = ST l
+whatsWrong1 :: Brd->WINNER
+whatsWrong1 s  | l >=9 = FW
+               | otherwise = ST l
               where l = length . filter (/=EM) . join $ s
 
 whatsWrong2 :: Brd->WINNER->WINNER
-whatsWrong2 s sn = minimum (sn : ([checker1, checker2, checker3] <*> [EM] <*> [0] <*> [ss]))
-                where ss =  join s
+whatsWrong2 s sn = minimum $ sn : res
+              where ss =  join s
+                    res= [checker1, checker2, checker3] <*> [EM] <*> [0] <*> [ss]
 
 --checkers
 checker1 s st ln
@@ -69,7 +70,7 @@ checker2 s st ln
            | s==CR = ZW
            | st>2  = GA
            | otherwise = checker2 (sums modLn) (st+1) ln
-                where modLn = (take 1 . drop st $ ln) ++(take 1 . drop (st+3) $ ln)++(take 1 . drop (st+6) $ ln)
+          where modLn = (take 1 . drop st $ ln) ++(take 1 . drop (st+3) $ ln)++(take 1 . drop (st+6) $ ln)
 
 
 checker3 s st ln
